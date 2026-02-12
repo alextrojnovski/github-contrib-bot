@@ -26,9 +26,9 @@ func main() {
 		log.Fatal("TELEGRAM_CHAT_ID должен быть числом")
 	}
 
-	username := os.Getenv("GITHUB_USERNAME")
+	username := os.Getenv("GH_USERNAME")
 	if username == "" {
-		log.Fatal("GITHUB_USERNAME не установлен")
+		log.Fatal("GH_USERNAME не установлен")
 	}
 
 	// ============ ИНИЦИАЛИЗИРУЕМ БАЗУ ДАННЫХ ============

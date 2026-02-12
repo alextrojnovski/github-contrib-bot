@@ -1,0 +1,47 @@
+name: Daily GitHub Contribution Check
+
+on:
+  schedule:
+    # Запуск каждый день в 17:00 UTC (20:00 мск / 19:00 мск зимой)
+    - cron: '0 17 * * *'
+  workflow_dispatch:  # Возможность запуска вручную
+
+jobs:
+  check-contributions:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        # Важно! Нужно для сохранения БД
+        token: ${{ secrets.GH_USERNAME }}
+    
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+        cache: true
+    
+    - name: Install dependencies
+      run: go mod download
+    
+    - name: Install SQLite
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sqlite3 libsqlite3-dev gcc
+    
+    - name: Run contribution checker
+      run: go run .
+      env:
+        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
+    
+    - name: Commit and push database
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add commits.db
+        git diff --quiet && git diff --staged --quiet || git commit -m "Update contribution stats [skip ci]"
+        git push
