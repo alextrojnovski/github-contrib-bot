@@ -2,9 +2,8 @@ name: Daily GitHub Contribution Check
 
 on:
   schedule:
-    # Запуск каждый день в 17:00 UTC (20:00 мск / 19:00 мск зимой)
     - cron: '0 17 * * *'
-  workflow_dispatch:  # Возможность запуска вручную
+  workflow_dispatch:
 
 jobs:
   check-contributions:
@@ -14,8 +13,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        # Важно! Нужно для сохранения БД
-        token: ${{ secrets.GH_USERNAME }}
+        token: ${{ secrets.GITHUB_TOKEN }}  # Встроенный токен!
     
     - name: Setup Go
       uses: actions/setup-go@v5
@@ -36,9 +34,11 @@ jobs:
       env:
         TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
+        GH_USERNAME: ${{ secrets.GH_USERNAME }}  # Это твой логин!
     
     - name: Commit and push database
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Встроенный токен!
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
